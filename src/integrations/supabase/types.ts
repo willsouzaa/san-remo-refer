@@ -14,13 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      commissions: {
+        Row: {
+          commission_amount: number | null
+          commission_rate: number
+          created_at: string | null
+          deal_value: number
+          id: string
+          referral_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string | null
+          deal_value: number
+          id?: string
+          referral_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string | null
+          deal_value?: number
+          id?: string
+          referral_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string | null
+          phone: string | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          name?: string | null
+          phone?: string | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string | null
+          phone?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          address: string
+          created_at: string | null
+          estimate_value: number | null
+          id: string
+          notes: string | null
+          owner_email: string | null
+          owner_name: string
+          owner_phone: string | null
+          property_type: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          estimate_value?: number | null
+          id?: string
+          notes?: string | null
+          owner_email?: string | null
+          owner_name: string
+          owner_phone?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          estimate_value?: number | null
+          id?: string
+          notes?: string | null
+          owner_email?: string | null
+          owner_name?: string
+          owner_phone?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_staff: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
