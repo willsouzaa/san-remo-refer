@@ -1,260 +1,306 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import Header from "@/components/Header"
-import Footer from "@/components/Footer"
-import { 
-  Users, 
-  CheckCircle, 
-  DollarSign, 
-  FileText, 
-  Plus,
-  TrendingUp,
-  Calendar,
-  Home
-} from "lucide-react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-const Dashboard = () => {
-  // Mock data - será substituído por dados reais do Supabase
-  const stats = {
-    totalIndicacoes: 12,
-    aprovadas: 8,
-    fechadas: 3,
-    comissaoEstimada: 4500
-  }
+interface Referral {
+  id: string;
+  address: string;
+  property_type: string;
+  status: string;
+  estimate_value: number | null;
+  created_at: string;
+}
 
-  const recentIndicacoes = [
-    {
-      id: 1,
-      endereco: "Rua das Flores, 123 - Vila Madalena",
-      tipo: "Apartamento",
-      valor: 450000,
-      status: "em_analise",
-      data: "2024-01-15",
-      proprietario: "João Silva"
-    },
-    {
-      id: 2,
-      endereco: "Av. Paulista, 1000 - Bela Vista",
-      tipo: "Comercial",
-      valor: 890000,
-      status: "aprovado",
-      data: "2024-01-10",
-      proprietario: "Maria Santos"
-    },
-    {
-      id: 3,
-      endereco: "Rua Augusta, 500 - Consolação",
-      tipo: "Casa",
-      valor: 750000,
-      status: "fechado",
-      data: "2024-01-05",
-      proprietario: "Carlos Lima"
+interface Stats {
+  total: number;
+  approved: number;
+  closed: number;
+  totalCommission: number;
+}
+
+export default function Dashboard() {
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, closed: 0, totalCommission: 0 });
+  const [loading, setLoading] = useState(true);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
     }
-  ]
+
+    fetchDashboardData();
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    
+    // Fetch referrals
+    const { data: referralsData, error: referralsError } = await supabase
+      .from('referrals')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // Fetch all referrals for stats
+    const { data: allReferrals, error: statsError } = await supabase
+      .from('referrals')
+      .select('*')
+      .eq('user_id', user.id);
+
+    // Fetch commissions
+    const { data: commissionsData, error: commissionsError } = await supabase
+      .from('commissions')
+      .select('commission_amount')
+      .eq('user_id', user.id);
+
+    if (referralsError || statsError || commissionsError) {
+      console.error('Error fetching dashboard data:', { referralsError, statsError, commissionsError });
+    } else {
+      setReferrals(referralsData || []);
+      
+      const totalCommission = (commissionsData || []).reduce((sum, c) => sum + c.commission_amount, 0);
+      
+      setStats({
+        total: allReferrals?.length || 0,
+        approved: allReferrals?.filter(r => r.status === 'aprovado').length || 0,
+        closed: allReferrals?.filter(r => r.status === 'fechado').length || 0,
+        totalCommission
+      });
+    }
+    
+    setLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendente': return 'bg-yellow-100 text-yellow-800'
-      case 'em_analise': return 'bg-blue-100 text-blue-800'
-      case 'aprovado': return 'bg-green-100 text-green-800'
-      case 'rejeitado': return 'bg-red-100 text-red-800'
-      case 'fechado': return 'bg-purple-100 text-purple-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'pendente': return 'secondary';
+      case 'em_analise': return 'outline';
+      case 'aprovado': return 'default';
+      case 'fechado': return 'default';
+      case 'rejeitado': return 'destructive';
+      default: return 'secondary';
     }
-  }
+  };
 
-  const getStatusText = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pendente': return 'Pendente'
-      case 'em_analise': return 'Em Análise'
-      case 'aprovado': return 'Aprovado'
-      case 'rejeitado': return 'Rejeitado'
-      case 'fechado': return 'Fechado'
-      default: return 'Desconhecido'
+      case 'pendente': return 'Pendente';
+      case 'em_analise': return 'Em análise';
+      case 'aprovado': return 'Aprovado';
+      case 'fechado': return 'Fechado';
+      case 'rejeitado': return 'Rejeitado';
+      default: return status;
     }
+  };
+
+  if (!user) {
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="py-8">
-        <div className="container mx-auto px-4 lg:px-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-primary mb-2">
-              Bem-vindo ao seu Dashboard
+    <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Acompanhe suas indicações e comissões em tempo real
+              Olá, {user.user_metadata?.name || user.email}! Acompanhe suas indicações e ganhos.
             </p>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="shadow-card border-border/50 hover:shadow-elegant transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total de Indicações
-                </CardTitle>
-                <FileText className="h-4 w-4 text-secondary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.totalIndicacoes}</div>
-                <p className="text-xs text-muted-foreground">+2 esta semana</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-card border-border/50 hover:shadow-elegant transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Aprovadas
-                </CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.aprovadas}</div>
-                <p className="text-xs text-muted-foreground">
-                  {Math.round((stats.aprovadas / stats.totalIndicacoes) * 100)}% de aprovação
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-card border-border/50 hover:shadow-elegant transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Negócios Fechados
-                </CardTitle>
-                <TrendingUp className="h-4 w-4 text-purple-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.fechadas}</div>
-                <p className="text-xs text-muted-foreground">+1 este mês</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-card border-border/50 hover:shadow-gold transition-all duration-300 bg-gradient-gold text-secondary-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-secondary-foreground/80">
-                  Comissão Estimada
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-secondary-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  R$ {stats.comissaoEstimada.toLocaleString('pt-BR')}
-                </div>
-                <p className="text-xs text-secondary-foreground/80">
-                  10% sobre negócios fechados
-                </p>
-              </CardContent>
-            </Card>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/indicar')} size="lg" className="shadow-elegant">
+              <Plus className="h-4 w-4 mr-2" />
+              Indicar Imóvel
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
           </div>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="lg:col-span-2 shadow-card border-border/50">
-              <CardHeader>
-                <CardTitle className="text-xl text-primary">Indicações Recentes</CardTitle>
-                <CardDescription>
-                  Suas últimas indicações e seus status atuais
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentIndicacoes.map((indicacao) => (
-                    <div key={indicacao.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/30 hover:shadow-card transition-all duration-300">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Home className="h-5 w-5 text-secondary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-primary">{indicacao.endereco}</p>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <span>{indicacao.tipo}</span>
-                            <span>•</span>
-                            <span>R$ {indicacao.valor.toLocaleString('pt-BR')}</span>
-                            <span>•</span>
-                            <span className="flex items-center space-x-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>{new Date(indicacao.data).toLocaleDateString('pt-BR')}</span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge className={getStatusColor(indicacao.status)}>
-                        {getStatusText(indicacao.status)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 text-center">
-                  <Button variant="outline" asChild>
-                    <Link to="/minhas-indicacoes">Ver Todas as Indicações</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="shadow-elegant border-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Indicações
+              </CardTitle>
+              <Home className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? '...' : stats.total}</div>
+              <p className="text-xs text-muted-foreground">
+                Indicações registradas
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card className="shadow-card border-border/50">
-              <CardHeader>
-                <CardTitle className="text-xl text-primary">Ações Rápidas</CardTitle>
-                <CardDescription>
-                  Acesse rapidamente as principais funcionalidades
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button variant="hero" className="w-full" size="lg" asChild>
-                  <Link to="/indicar">
-                    <Plus className="mr-2 h-5 w-5" />
-                    Nova Indicação
-                  </Link>
-                </Button>
-                
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/comissoes">
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    Minhas Comissões
-                  </Link>
-                </Button>
-                
-                <Button variant="ghost" className="w-full" asChild>
-                  <Link to="/faq">
-                    <Users className="mr-2 h-4 w-4" />
-                    Central de Ajuda
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="shadow-elegant border-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Indicações Aprovadas
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? '...' : stats.approved}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0}% de aprovação
+              </p>
+            </CardContent>
+          </Card>
 
-          {/* Info Banner */}
-          <Card className="bg-gradient-primary text-primary-foreground shadow-elegant">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    🎉 Programa de Indicação San Remo
-                  </h3>
-                  <p className="text-primary-foreground/90">
-                    Ganhe <strong>10% de comissão</strong> sobre cada negócio fechado. 
-                    Simples, rápido e seguro!
-                  </p>
-                </div>
-                <Button variant="secondary" asChild>
-                  <Link to="/faq">Saiba Mais</Link>
-                </Button>
+          <Card className="shadow-elegant border-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Negócios Fechados
+              </CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? '...' : stats.closed}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.total > 0 ? Math.round((stats.closed / stats.total) * 100) : 0}% conversão
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-elegant border-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Comissão Total
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(stats.totalCommission)}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Taxa de 10% sobre vendas
+              </p>
             </CardContent>
           </Card>
         </div>
-      </main>
 
-      <Footer />
+        {/* Recent Referrals and Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 shadow-elegant border-0">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Indicações Recentes</CardTitle>
+              <CardDescription>
+                Suas últimas indicações de imóveis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Carregando indicações...</p>
+                  </div>
+                </div>
+              ) : referrals.length === 0 ? (
+                <div className="text-center py-8">
+                  <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Nenhuma indicação ainda</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Comece indicando seu primeiro imóvel para a San Remo
+                  </p>
+                  <Button onClick={() => navigate('/indicar')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Fazer primeira indicação
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {referrals.map((referral) => (
+                    <div
+                      key={referral.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getStatusColor(referral.status)}>
+                            {getStatusLabel(referral.status)}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground capitalize">
+                            {referral.property_type}
+                          </span>
+                        </div>
+                        <p className="font-medium">{referral.address}</p>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(referral.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                        </div>
+                      </div>
+                      {referral.estimate_value && (
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">Valor estimado</p>
+                          <p className="font-semibold">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(referral.estimate_value)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-elegant border-0">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Ações Rápidas</CardTitle>
+              <CardDescription>
+                Acesse rapidamente as principais funcionalidades
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button onClick={() => navigate('/indicar')} className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Indicação
+              </Button>
+              <Button onClick={() => navigate('/comissoes')} variant="outline" className="w-full justify-start">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Ver Comissões
+              </Button>
+              <Button onClick={() => navigate('/faq')} variant="outline" className="w-full justify-start">
+                <Home className="h-4 w-4 mr-2" />
+                FAQ
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
-
-export default Dashboard

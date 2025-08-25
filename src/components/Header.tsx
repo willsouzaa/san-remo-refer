@@ -51,11 +51,11 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link to="/dashboard">Dashboard</Link>
+            <Button variant="outline" onClick={() => window.location.href = '/auth'}>
+              Entrar
             </Button>
-            <Button variant="hero" asChild>
-              <Link to="/indicar">Indicar Imóvel</Link>
+            <Button variant="hero" onClick={() => window.location.href = '/indicar'}>
+              Indicar Imóvel
             </Button>
           </div>
 
@@ -88,11 +88,11 @@ const Header = () => {
                 </Link>
               ))}
               <div className="pt-2 space-y-2">
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
+                <Button variant="outline" className="w-full" onClick={() => window.location.href = '/auth'}>
+                  Entrar
                 </Button>
-                <Button variant="hero" className="w-full" asChild>
-                  <Link to="/indicar" onClick={() => setIsMenuOpen(false)}>Indicar Imóvel</Link>
+                <Button variant="hero" className="w-full" onClick={() => window.location.href = '/indicar'}>
+                  Indicar Imóvel
                 </Button>
               </div>
             </nav>
