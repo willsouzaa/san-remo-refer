@@ -1,0 +1,206 @@
+📄 Documentação do Projeto – Sistema de Indicação de Imóveis
+📌 Visão Geral
+O projeto tem como objetivo criar uma plataforma de indicação de imóveis para uma imobiliária.
+ Através dela, qualquer pessoa poderá se cadastrar, indicar um imóvel, e caso o negócio seja fechado, receberá uma recompensa financeira.
+
+🏗️ Arquitetura do Projeto
+O projeto será desenvolvido utilizando as seguintes ferramentas principais:
+Lovable – Framework low-code/no-code para desenvolvimento da interface (frontend + backend leve).
+
+
+Supabase – Banco de dados e autenticação (Postgres + Auth).
+
+
+n8n – Automação de processos, integrações e orquestração de workflows.
+
+
+Fluxo Resumido
+Usuário acessa a plataforma e realiza cadastro/login.
+
+
+Usuário indica um imóvel, preenchendo dados básicos.
+
+
+O imóvel fica registrado no Supabase.
+
+
+A equipe da imobiliária recebe a indicação e avalia.
+
+
+Caso o imóvel seja vendido/alugado, o sistema registra a comissão para o indicador.
+
+
+O indicador recebe o pagamento conforme regras da imobiliária.
+
+
+
+
+🔑 Funcionalidades Principais
+Cadastro e Login (usuários e equipe da imobiliária).
+
+
+Indicação de Imóveis com dados básicos (endereço, contato, valor estimado, fotos opcionais).
+
+
+Painel da Imobiliária com lista de indicações, status e acompanhamento.
+
+
+Controle de Status do Imóvel:
+
+
+Pendente
+
+
+Em análise
+
+
+Aprovado
+
+
+Negócio fechado
+
+
+Controle de Comissões: cálculo e registro do valor a ser pago para o indicador.
+
+
+Notificações Automáticas via e-mail/WhatsApp (via n8n).
+
+
+
+⚙️ Stack Técnica
+Frontend: Lovable (com integrações para Supabase).
+
+
+Backend: Supabase (Postgres + Edge Functions).
+
+
+Automação & Integrações: n8n (fluxos de envio de e-mails, avisos de status, atualização de CRM caso necessário).
+
+
+
+
+
+
+
+📊 Estrutura do Banco (Supabase)
+Tabelas principais:
+users
+
+
+id
+
+
+nome
+
+
+email
+
+
+telefone
+
+
+tipo_usuario (indicador / imobiliaria)
+
+
+data_cadastro
+
+
+imoveis_indicados
+
+
+id
+
+
+user_id (quem indicou)
+
+
+endereco
+
+
+contato_proprietario
+
+
+valor_estimado
+
+
+status (pendente, aprovado, fechado, rejeitado)
+
+
+data_indicacao
+
+
+comissoes
+
+
+id
+
+
+imovel_id
+
+
+user_id (quem recebe)
+
+
+valor
+
+
+status_pagamento (pendente, pago)
+
+
+data_registro
+
+
+
+🔄 Fluxos no n8n
+Novo Cadastro: enviar e-mail de boas-vindas.
+
+
+Nova Indicação: notificar equipe da imobiliária.
+
+
+Status Atualizado: notificar o indicador.
+
+
+Comissão Paga: enviar recibo ao indicador.
+
+
+
+🎯 Próximos Passos
+Configuração do Supabase
+
+
+Criar tabelas: users, imoveis_indicados, comissoes.
+
+
+Configurar autenticação (e-mail/senha, talvez login social).
+
+
+Desenvolvimento no Lovable
+
+
+Criar páginas:
+
+
+Home
+
+
+Cadastro/Login
+
+
+Formulário de Indicação
+
+
+Dashboard (usuário e imobiliária)
+
+
+Integração com n8n
+
+
+Criar workflows de automação (notificações e controle de status).
+
+
+Testes iniciais
+
+
+Simular cadastro, indicação e fechamento de negócio.
+
