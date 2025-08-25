@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button"
 import { Building2, Menu, X } from "lucide-react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
+import { useIsAdmin } from "@/hooks/useIsAdmin" // import do hook
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
+  const isAdmin = useIsAdmin() // uso do hook
 
   const navigation = [
     { name: "Início", href: "/" },
@@ -47,6 +49,18 @@ const Header = () => {
                 {item.name}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`text-sm font-medium transition-colors hover:text-secondary ${
+                  isActive("/admin")
+                    ? "text-secondary border-b-2 border-secondary pb-1"
+                    : "text-muted-foreground"
+                }`}
+              >
+                Painel Admin
+              </Link>
+            )}
           </nav>
 
           {/* CTA Buttons */}
@@ -87,6 +101,19 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActive("/admin")
+                      ? "bg-muted text-secondary"
+                      : "text-muted-foreground hover:text-secondary hover:bg-muted/50"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Painel Admin
+                </Link>
+              )}
               <div className="pt-2 space-y-2">
                 <Button variant="outline" className="w-full" onClick={() => window.location.href = '/auth'}>
                   Entrar

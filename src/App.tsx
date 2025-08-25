@@ -8,19 +8,55 @@ import ReferralForm from './pages/ReferralForm';
 import Commissions from './pages/Commissions';
 import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
+import AdminDashboard from "@/pages/AdminDashboard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          {/* públicas */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/indicar" element={<ReferralForm />} />
-          <Route path="/comissoes" element={<Commissions />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
+
+          {/* protegidas */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/indicar"
+            element={
+              <ProtectedRoute>
+                <ReferralForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/comissoes"
+            element={
+              <ProtectedRoute>
+                <Commissions />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* admin */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
         <Toaster />
       </Router>
