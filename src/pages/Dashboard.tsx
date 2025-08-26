@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut } from 'lucide-react';
+import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -26,6 +26,34 @@ interface Stats {
 }
 
 export default function Dashboard() {
+  // Excluir indicação
+  const handleDeleteReferral = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta indicação?')) return;
+    // Busca os dados antes de excluir para enviar ao webhook
+    const { data: referralData, error: fetchError } = await supabase.from('referrals').select('*').eq('id', id).single();
+    if (fetchError || !referralData) {
+      alert('Erro ao buscar imóvel para exclusão: ' + (fetchError?.message || 'Não encontrado'));
+      return;
+    }
+    const { error } = await supabase.from('referrals').delete().eq('id', id);
+    if (error) {
+      alert('Erro ao excluir: ' + error.message);
+      console.error('Detalhes do erro Supabase ao excluir:', error);
+    } else {
+      setReferrals(referrals.filter(r => r.id !== id));
+      setStats(s => ({ ...s, total: s.total - 1 }));
+      // Envia webhook para n8n
+      try {
+        await fetch('https://pauloamancio1.app.n8n.cloud/webhook-test/6c1e5c7d-cbd7-47e6-9207-a8185724479f', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...referralData, action: 'delete' })
+        });
+      } catch (err) {
+        console.error('Erro ao enviar webhook de exclusão:', err);
+      }
+    }
+  };
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, closed: 0, totalCommission: 0 });
   const [loading, setLoading] = useState(true);
@@ -259,17 +287,27 @@ export default function Dashboard() {
                           {format(new Date(referral.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                         </div>
                       </div>
-                      {referral.estimate_value && (
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Valor estimado</p>
-                          <p className="font-semibold">
-                            {new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL'
-                            }).format(referral.estimate_value)}
-                          </p>
+                      <div className="flex flex-col items-end gap-2 min-w-[120px]">
+                        {referral.estimate_value && (
+                          <div className="text-right">
+                            <p className="text-sm text-muted-foreground">Valor estimado</p>
+                            <p className="font-semibold">
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                              }).format(referral.estimate_value)}
+                            </p>
+                          </div>
+                        )}
+                        <div className="flex gap-2 mt-2">
+                          <Button size="icon" variant="ghost" title="Editar" onClick={() => navigate(`/editar-indicacao/${referral.id}`)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" title="Excluir" onClick={() => handleDeleteReferral(referral.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>

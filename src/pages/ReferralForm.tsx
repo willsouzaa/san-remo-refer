@@ -56,28 +56,31 @@ export default function ReferralForm() {
     };
 
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('referrals')
-      .insert([referralData]);
-
-    // Envia os dados para o n8n webhook
-    try {
-      await fetch('https://pauloamancio1.app.n8n.cloud/webhook-test/6c1e5c7d-cbd7-47e6-9207-a8185724479f', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(referralData)
-      });
-    } catch (err) {
-      console.error('Erro ao enviar para o n8n:', err);
-    }
+      .insert([referralData])
+      .select();
 
     if (error) {
+      console.error('Erro ao criar indicação:', error);
       toast({
         title: "Erro ao criar indicação",
         description: error.message,
         variant: "destructive"
       });
     } else {
+      const created = data && data[0];
+      console.log('Imóvel criado:', created);
+      // Envia os dados para o n8n webhook
+      try {
+        await fetch('https://pauloamancio1.app.n8n.cloud/webhook-test/6c1e5c7d-cbd7-47e6-9207-a8185724479f', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(created)
+        });
+      } catch (err) {
+        console.error('Erro ao enviar para o n8n:', err);
+      }
       toast({
         title: "Indicação criada com sucesso!",
         description: "Sua indicação foi registrada e está sendo analisada pela nossa equipe."
