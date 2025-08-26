@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+# San Remo – Sistema de Indicação
 
-## Project info
+## Descrição
 
-**URL**: https://lovable.dev/projects/8954cb65-1fb5-4555-912e-a2eeaac6b697
+Este projeto é um sistema de indicação de imóveis para a imobiliária San Remo. Usuários podem indicar imóveis, acompanhar o status das indicações e receber comissões caso o negócio seja fechado. O sistema integra automações via n8n para notificações e outras ações.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Funcionalidades Principais
 
-**Use Lovable**
+- Cadastro e autenticação de usuários
+- Formulário de indicação de imóveis
+- Dashboard com acompanhamento de indicações e comissões
+- Integração com Supabase (banco de dados e autenticação)
+- Integração com n8n (webhook para automações)
+- Notificações e feedback ao usuário
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8954cb65-1fb5-4555-912e-a2eeaac6b697) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Como Rodar o Projeto
 
-**Use your preferred IDE**
+1. **Pré-requisitos:**
+   - Node.js 18+
+   - Yarn ou npm
+   - Conta no Supabase (configurada em `src/integrations/supabase/client.ts`)
+   - Conta no n8n (opcional, para automações)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Instalação:**
+   ```bash
+   # Instale as dependências
+   npm install
+   # ou
+   yarn install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Configuração:**
+   - Configure as variáveis do Supabase em `src/integrations/supabase/client.ts`.
+   - (Opcional) Configure a URL do webhook do n8n em `src/pages/ReferralForm.tsx`.
 
-Follow these steps:
+4. **Rodando o projeto:**
+   ```bash
+   npm run dev
+   # ou
+   yarn dev
+   ```
+   O sistema estará disponível em `http://localhost:5173` (ou porta definida pelo Vite).
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Estrutura de Pastas
 
-# Step 3: Install the necessary dependencies.
-npm i
+- `src/pages/ReferralForm.tsx` – Formulário de indicação
+- `src/pages/Dashboard.tsx` – Dashboard do usuário
+- `src/integrations/supabase/` – Integração com Supabase
+- `src/components/ui/` – Componentes reutilizáveis
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## Observações
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- O sistema exige autenticação para indicar imóveis.
+- O envio para o n8n permite automações como envio de e-mails, notificações, etc.
+- O projeto utiliza Tailwind CSS para estilização.
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Licença
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8954cb65-1fb5-4555-912e-a2eeaac6b697) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+MIT
