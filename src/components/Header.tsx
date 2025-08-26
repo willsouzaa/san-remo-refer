@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Building2, Menu, X } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import ComoFunciona from "@/pages/ComoFunciona"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -18,17 +19,25 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link to="#como-funciona" className="text-sm font-medium text-blue-800 hover:text-orange-500">
-            Como funciona
-          </Link>
-          <Link to="#sobre-aplicativo" className="text-sm font-medium text-blue-800 hover:text-orange-500">
-            Sobre o aplicativo
-          </Link>
-          <Button variant="secondary" onClick={() => window.location.href='/indicar'}>
-            INDICAR
-          </Button>
-        </nav>
+        {/* Desktop Navigation */}
+<nav className="hidden md:flex items-center space-x-6">
+  <Link 
+    to="/como-funciona" 
+    className="text-sm font-medium text-blue-800 hover:text-orange-500"
+  >
+    Como funciona
+  </Link>
+  <Link 
+    to="/sobre-aplicativo" 
+    className="text-sm font-medium text-blue-800 hover:text-orange-500"
+  >
+    Sobre o aplicativo
+  </Link>
+  <Button variant="secondary" onClick={() => window.location.href='/indicar'}>
+    INDICAR
+  </Button>
+</nav>
+
 
         {/* Mobile Menu */}
         <button className="md:hidden p-2 rounded-lg text-blue-800" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -38,12 +47,22 @@ const Header = () => {
 
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow py-2 flex flex-col items-center space-y-2">
-          <Link to="#como-funciona" className="text-blue-800 hover:text-orange-500" onClick={() => setIsMenuOpen(false)}>
-            Como funciona
-          </Link>
-          <Link to="#sobre-aplicativo" className="text-blue-800 hover:text-orange-500" onClick={() => setIsMenuOpen(false)}>
-            Sobre o aplicativo
-          </Link>
+          <Link 
+  to="/como-funciona" 
+  className="text-blue-800 hover:text-orange-500" 
+  onClick={() => setIsMenuOpen(false)}
+>
+  Como funciona
+</Link>
+
+<Link 
+  to="/sobre-aplicativo" 
+  className="text-blue-800 hover:text-orange-500" 
+  onClick={() => setIsMenuOpen(false)}
+>
+  Sobre o aplicativo
+</Link>
+
           <Button variant="secondary" className="w-4/5" onClick={() => window.location.href='/indicar'}>
             INDICAR
           </Button>

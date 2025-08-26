@@ -67,25 +67,26 @@ const LandingPage = () => {
 
 
   const testimonials = [
-    {
-      name: "Ana Paula",
-      role: "Indicadora desde 2023",
-      content: "Já ganhei mais de R$ 15.000 em comissões indicando imóveis para a San Remo. Super recomendo!",
-      rating: 5
-    },
-    {
-      name: "Roberto Silva",
-      role: "Corretor parceiro",
-      content: "O sistema é muito fácil de usar e o pagamento sempre em dia. Excelente oportunidade!",
-      rating: 5
-    },
-    {
-      name: "Mariana Costa",
-      role: "Nova indicadora",
-      content: "Minha primeira indicação já foi aprovada! Processo super transparente e equipe muito atenciosa.",
-      rating: 5
-    }
-  ]
+  {
+    name: "Cláudia Mendes",
+    role: "Indicadora há 2 anos",
+    content: "Consegui indicar vários imóveis e receber minhas comissões rapidamente. É incrível como o processo é simples e seguro.",
+    rating: 5
+  },
+  {
+    name: "Fábio Santos",
+    role: "Corretor parceiro",
+    content: "O painel é muito intuitivo e facilita acompanhar cada indicação. Já recomendei para amigos que também começaram a lucrar.",
+    rating: 5
+  },
+  {
+    name: "Larissa Oliveira",
+    role: "Nova indicadora",
+    content: "Minha primeira indicação foi aprovada em poucos dias! O suporte foi atencioso e o pagamento chegou conforme prometido.",
+    rating: 5
+  }
+];
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -229,40 +230,40 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
-              O que dizem nossos indicadores
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Histórias reais de sucesso
-            </p>
-          </div>
+     {/* Testimonials */}
+<section className="py-16 bg-muted/30">
+  <div className="container mx-auto px-4 lg:px-8">
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+        O que dizem nossos indicadores
+      </h2>
+      <p className="text-xl text-muted-foreground">
+        Histórias reais de quem já ganha com o San Remo Indica
+      </p>
+    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-card border-border/50 hover:shadow-elegant transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className="flex items-center mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-secondary fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4 italic">
-                    "{testimonial.content}"
-                  </p>
-                  <div>
-                    <p className="font-semibold text-primary">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {testimonials.map((testimonial, index) => (
+        <Card key={index} className="shadow-card border-border/50 hover:shadow-elegant transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center mb-4">
+              {Array.from({ length: testimonial.rating }).map((_, i) => (
+                <Star key={i} className="h-5 w-5 text-secondary fill-current" />
+              ))}
+            </div>
+            <p className="text-muted-foreground mb-4 italic">
+              "{testimonial.content}"
+            </p>
+            <div>
+              <p className="font-semibold text-primary">{testimonial.name}</p>
+              <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-hero text-primary-foreground">

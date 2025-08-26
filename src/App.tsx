@@ -11,6 +11,8 @@ import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ComoFunciona from "@/pages/ComoFunciona"
+import SobreAplicativo from "@/pages/SobreAplicativo"
 
 function App() {
   return (
@@ -22,6 +24,9 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/como-funciona" element={<ComoFunciona />} />
+          <Route path="/sobre-aplicativo" element={<SobreAplicativo />} />
+
 
           {/* protegidas */}
           <Route
