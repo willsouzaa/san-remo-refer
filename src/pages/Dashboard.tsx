@@ -58,7 +58,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, closed: 0, totalCommission: 0 });
   const [loading, setLoading] = useState(true);
   const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const   navigate = useNavigate();
 
   useEffect(() => {
     if (!user) {
