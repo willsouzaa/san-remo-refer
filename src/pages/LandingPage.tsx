@@ -21,48 +21,50 @@ import heroImage from "@/assets/hero-bg.jpg"
 
 const LandingPage = () => {
   const features = [
-    {
-      icon: DollarSign,
-      title: "Comissão Garantida",
-      description: "Ganhe 10% sobre o valor líquido recebido pela imobiliária quando o negócio for fechado",
-      highlight: "10% de comissão"
-    },
-    {
-      icon: Clock,
-      title: "Processo Ágil",
-      description: "Sistema simples e intuitivo. Cadastre sua indicação em poucos minutos",
-      highlight: "Rápido e fácil"
-    },
-    {
-      icon: Shield,
-      title: "Totalmente Seguro",
-      description: "Seus dados e os do proprietário são protegidos com máxima segurança",
-      highlight: "100% seguro"
-    }
-  ]
+  {
+    icon: DollarSign,
+    title: "Comissão Garantida",
+    description: "Ganhe até 10% sobre o valor líquido de cada negócio fechado. Quanto mais indicar, mais você fatura!",
+    highlight: "Comissões altas"
+  },
+  {
+    icon: Clock,
+    title: "Processo Ágil",
+    description: "Sistema simples e intuitivo. Cadastre suas indicações em minutos e acompanhe o status em tempo real.",
+    highlight: "Rápido e fácil"
+  },
+  {
+    icon: Shield,
+    title: "Totalmente Seguro",
+    description: "Seus dados e os do proprietário são protegidos com tecnologia de ponta, garantindo segurança total nas transações.",
+    highlight: "100% seguro"
+  }
+]
+
 
   const steps = [
-    {
-      step: "1",
-      title: "Cadastre-se",
-      description: "Crie sua conta gratuita no San Remo Indica"
-    },
-    {
-      step: "2", 
-      title: "Indique Imóveis",
-      description: "Preencha o formulário com dados do imóvel e proprietário"
-    },
-    {
-      step: "3",
-      title: "Acompanhe",
-      description: "Monitore o status da sua indicação pelo dashboard"
-    },
-    {
-      step: "4",
-      title: "Receba",
-      description: "Ganhe sua comissão quando o negócio for fechado"
-    }
-  ]
+  {
+    step: "1",
+    title: "Cadastre-se",
+    description: "Crie sua conta gratuita e tenha acesso imediato ao dashboard de indicações."
+  },
+  {
+    step: "2", 
+    title: "Indique Imóveis",
+    description: "Preencha o formulário de forma rápida e maximize suas chances de receber comissões."
+  },
+  {
+    step: "3",
+    title: "Acompanhe",
+    description: "Veja o status das suas indicações em tempo real e saiba exatamente quando a comissão será liberada."
+  },
+  {
+    step: "4",
+    title: "Receba",
+    description: "Receba pagamentos rapidamente assim que o negócio for fechado, sem burocracia."
+  }
+]
+
 
   const testimonials = [
     {
@@ -105,15 +107,14 @@ const LandingPage = () => {
             </Badge>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Indique imóveis para a 
-              <span className="text-secondary"> San Remo</span> e ganhe 
-              <span className="text-secondary"> recompensas</span>
-            </h1>
+  Indique imóveis para a <span className="text-secondary">San Remo</span> e <span className="text-secondary">ganhe até 10% de comissão</span>
+</h1>
+
             
             <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90 max-w-3xl mx-auto leading-relaxed">
-              <strong>Simples, rápido e seguro.</strong> Conecte proprietários à San Remo e 
-              ganhe comissão quando o negócio for fechado.
-            </p>
+  <strong>Simples, rápido e seguro.</strong> Conecte proprietários à San Remo e <strong>garanta sua comissão em cada negócio fechado</strong>.
+</p>
+
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button variant="secondary" size="lg" className="text-lg px-8 py-4" asChild>
@@ -270,8 +271,9 @@ const LandingPage = () => {
             Pronto para começar a ganhar?
           </h2>
           <p className="text-xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
-            Junte-se a centenas de indicadores que já estão lucrando com o San Remo Indica
-          </p>
+  Junte-se a centenas de indicadores que já estão <strong>lucrando milhares de reais</strong> com o San Remo Indica.
+</p>
+
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="secondary" size="lg" className="text-lg px-8 py-4" asChild>
