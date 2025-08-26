@@ -55,9 +55,21 @@ export default function ReferralForm() {
       notes: formData.get('notes') as string
     };
 
+
     const { error } = await supabase
       .from('referrals')
       .insert([referralData]);
+
+    // Envia os dados para o n8n webhook
+    try {
+      await fetch('https://pauloamancio1.app.n8n.cloud/webhook-test/6c1e5c7d-cbd7-47e6-9207-a8185724479f', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(referralData)
+      });
+    } catch (err) {
+      console.error('Erro ao enviar para o n8n:', err);
+    }
 
     if (error) {
       toast({
