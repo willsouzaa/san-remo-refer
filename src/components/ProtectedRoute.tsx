@@ -8,9 +8,14 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const isAdmin = useIsAdmin();
   const location = useLocation();
+
+  // Show loading while auth is being determined
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
 
   // Não logado → manda pro login com redirect
   if (!user) {
@@ -18,7 +23,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: Protecte
   }
 
   // Só redireciona se já tiver certeza que não é admin
-  if (adminOnly && isAdmin === false) {
+  if (adminOnly && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
