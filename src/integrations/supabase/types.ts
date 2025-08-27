@@ -69,6 +69,7 @@ export type Database = {
           id: string
           name: string | null
           phone: string | null
+          pix_key: string | null
           role: string | null
         }
         Insert: {
@@ -77,6 +78,7 @@ export type Database = {
           id: string
           name?: string | null
           phone?: string | null
+          pix_key?: string | null
           role?: string | null
         }
         Update: {
@@ -85,6 +87,7 @@ export type Database = {
           id?: string
           name?: string | null
           phone?: string | null
+          pix_key?: string | null
           role?: string | null
         }
         Relationships: []
@@ -92,6 +95,7 @@ export type Database = {
       referrals: {
         Row: {
           address: string
+          commission_percent: number | null
           created_at: string | null
           estimate_value: number | null
           id: string
@@ -106,6 +110,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          commission_percent?: number | null
           created_at?: string | null
           estimate_value?: number | null
           id?: string
@@ -120,6 +125,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          commission_percent?: number | null
           created_at?: string | null
           estimate_value?: number | null
           id?: string
