@@ -3,72 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Building2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useAuth from "@/hooks/useAuth";
-import { useIsAdmin, useIsStaff, useUserRole } from "@/hooks/useIsAdmin";
-
-interface NavigationItem {
-  name: string;
-  href: string;
-  protected?: boolean;
-  adminOnly?: boolean;
-  financeOnly?: boolean;
-  commercialOnly?: boolean;
-}
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const isAdmin = useIsAdmin();
-  const isStaff = useIsStaff();
-  const userRole = useUserRole();
   const navigate = useNavigate();
 
-  // Dynamic navigation based on user role
-  const getNavigationItems = (): NavigationItem[] => {
-    const baseNavigation: NavigationItem[] = [
-      { name: "Início", href: "/" },
-      { name: "Dashboard", href: "/dashboard", protected: true },
-      { name: "FAQ", href: "/faq" },
-    ];
-
-    if (user) {
-      // Items for all authenticated users
-      baseNavigation.push(
-        { name: "Indicar", href: "/indicar", protected: true },
-        { name: "Comissões", href: "/comissoes", protected: true }
-      );
-
-      // Role-specific items
-      if (isAdmin) {
-        baseNavigation.push(
-          { name: "Admin", href: "/admin", adminOnly: true },
-          { name: "Gestão de Imóveis", href: "/gestao-imoveis", adminOnly: true },
-          { name: "Usuários", href: "/usuarios", adminOnly: true }
-        );
-      }
-
-      if (userRole === 'finance' || isAdmin) {
-        baseNavigation.push(
-          { name: "Financeiro", href: "/financeiro", financeOnly: true }
-        );
-      }
-
-      if (userRole === 'commercial' || isAdmin) {
-        baseNavigation.push(
-          { name: "Comercial", href: "/comercial", commercialOnly: true }
-        );
-      }
-    }
-
-    // Public pages at the end
-    baseNavigation.push(
-      { name: "Como Funciona", href: "/como-funciona" },
-      { name: "Sobre o Aplicativo", href: "/sobre-aplicativo" }
-    );
-
-    return baseNavigation;
-  };
-
-  const navigation = getNavigationItems();
+  const navigation = [
+    { name: "Início", href: "/" },
+    { name: "Dashboard", href: "/dashboard", protected: true },
+    { name: "FAQ", href: "/faq" },
+    { name: "Indicar", href: "/indicar", protected: true },
+    { name: "Comissões", href: "/comissoes", protected: true },
+    { name: "Admin", href: "/admin", adminOnly: true },
+    { name: "Como Funciona", href: "/como-funciona" },
+    { name: "Sobre o Aplicativo", href: "/sobre-aplicativo" },
+  ];
 
   const handleSignOut = () => {
     logout();
@@ -103,8 +55,6 @@ const Header = () => {
           {navigation.map((item) => {
             if (item.protected && !user) return null;
             if (item.adminOnly && !isAdmin) return null;
-            if (item.financeOnly && userRole !== 'finance' && !isAdmin) return null;
-            if (item.commercialOnly && userRole !== 'commercial' && !isAdmin) return null;
             return (
               <Link
                 key={item.name}
