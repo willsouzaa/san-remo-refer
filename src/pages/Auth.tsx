@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useAuth from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Home, Mail, Lock, User } from 'lucide-react';
+import { useIsAdmin } from "@/hooks/useRole";
+
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);

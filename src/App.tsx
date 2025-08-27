@@ -14,6 +14,8 @@ import ComoFunciona from './pages/ComoFunciona';
 import SobreAplicativo from './pages/SobreAplicativo';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from '@/components/ui/toaster';
+// Adicione a importação da nova página de gestão de usuários
+import AdminUsers from './pages/AdminUsers';
 
 function App() {
   return (
@@ -72,6 +74,15 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          {/* Nova rota para gestão de usuários (apenas admin) */}
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />
