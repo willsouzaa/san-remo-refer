@@ -4,17 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useAuth from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function CadastrarPix() {
   const { user } = useAuth();
   const [form, setForm] = useState({
     nome: user?.name || "",
-    tipoPix: "cpf",
-    chavePix: "",
+    tipopix: "cpf",
+    chavepix: "",
     banco: "",
   });
   const [loading, setLoading] = useState(false);
   const [pixCadastrado, setPixCadastrado] = useState<null | typeof form>(null);
+  const [erro, setErro] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,11 +25,26 @@ export default function CadastrarPix() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setErro(null);
 
-    // Aqui você pode salvar no Supabase, se desejar
-    // await supabase.from("pix_keys").insert([{ ...form, user_id: user.id }]);
+    if (!user?.id) {
+      setErro("Usuário não autenticado.");
+      setLoading(false);
+      return;
+    }
 
-    // Exibe os dados cadastrados abaixo do formulário
+    // Salva no Supabase com o user_id correto
+    
+    const { error } =await (supabase as any)
+        .from("pix_keys")
+        .insert([{ ...form, user_id: user.id }]);
+
+    if (error) {
+      setErro("Erro ao cadastrar PIX: " + error.message);
+      setLoading(false);
+      return;
+    }
+
     setPixCadastrado(form);
     setLoading(false);
   }
@@ -59,9 +76,9 @@ export default function CadastrarPix() {
             <div>
               <Label htmlFor="tipoPix">Tipo de chave PIX</Label>
               <select
-                id="tipoPix"
-                name="tipoPix"
-                value={form.tipoPix}
+                id="tipopix"
+                name="tipopix"
+                value={form.tipopix}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2"
               >
@@ -77,7 +94,7 @@ export default function CadastrarPix() {
               <Input
                 id="chavePix"
                 name="chavePix"
-                value={form.chavePix}
+                value={form.chavepix}
                 onChange={handleChange}
                 required
               />
@@ -95,6 +112,9 @@ export default function CadastrarPix() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Salvando..." : "Confirmar"}
             </Button>
+            {erro && (
+              <div className="text-red-600 text-sm mt-2">{erro}</div>
+            )}
           </form>
         </CardContent>
       </Card>
@@ -112,11 +132,11 @@ export default function CadastrarPix() {
             </div>
             <div>
               <span className="font-semibold">Tipo de chave: </span>
-              {pixCadastrado.tipoPix}
+              {pixCadastrado.tipopix}
             </div>
             <div>
               <span className="font-semibold">Chave PIX: </span>
-              {pixCadastrado.chavePix}
+              {pixCadastrado.chavepix}
             </div>
             <div>
               <span className="font-semibold">Banco: </span>
@@ -125,4 +145,6 @@ export default function CadastrarPix() {
           </CardContent>
         </Card>
       )}
-    </div>)};
+    </div>
+  );
+}
