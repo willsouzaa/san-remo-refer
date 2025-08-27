@@ -13,7 +13,6 @@ const ComoFunciona = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       <section className="py-24 text-center bg-blue-50">
         <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-6">Como funciona o San Remo Indica</h1>

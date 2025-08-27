@@ -90,7 +90,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+
       
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">

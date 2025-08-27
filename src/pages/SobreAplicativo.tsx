@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 const SobreAplicativo = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       <section className="py-24 text-center bg-orange-50">
         <h1 className="text-4xl md:text-5xl font-bold text-orange-600 mb-6">Sobre o Aplicativo</h1>

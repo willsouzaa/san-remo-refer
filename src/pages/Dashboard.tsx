@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import useAuth from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -57,8 +57,8 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, closed: 0, totalCommission: 0 });
   const [loading, setLoading] = useState(true);
-  const { user, signOut } = useAuth();
-  const   navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) {
@@ -67,13 +67,14 @@ export default function Dashboard() {
     }
 
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchDashboardData = async () => {
     if (!user) return;
 
     setLoading(true);
-    
+
     // Fetch referrals
     const { data: referralsData, error: referralsError } = await supabase
       .from('referrals')
@@ -98,9 +99,9 @@ export default function Dashboard() {
       console.error('Error fetching dashboard data:', { referralsError, statsError, commissionsError });
     } else {
       setReferrals(referralsData || []);
-      
+
       const totalCommission = (commissionsData || []).reduce((sum, c) => sum + c.commission_amount, 0);
-      
+
       setStats({
         total: allReferrals?.length || 0,
         approved: allReferrals?.filter(r => r.status === 'aprovado').length || 0,
@@ -108,12 +109,12 @@ export default function Dashboard() {
         totalCommission
       });
     }
-    
+
     setLoading(false);
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    await logout();
     navigate('/');
   };
 
@@ -153,7 +154,7 @@ export default function Dashboard() {
               Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Olá, {user.user_metadata?.name || user.email}! Acompanhe suas indicações e ganhos.
+              Olá, {user.name || user.email}! Acompanhe suas indicações e ganhos.
             </p>
           </div>
           <div className="flex gap-2">

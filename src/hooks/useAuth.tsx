@@ -1,133 +1,59 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/hooks/use-toast"; // Importa o toast
+import { createContext, useContext, useState, ReactNode } from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin?: boolean;
+}
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any; user: User | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
-  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error?: { message: string } }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error?: { message: string } }>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signUp = async (email: string, password: string, name: string) => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          name: name
-        }
-      }
-    });
-
-    if (error) {
-      toast({
-        title: "Erro ao cadastrar",
-        description: error.message || "Tente novamente.",
-      });
-    } else {
-      toast({
-        title: "Cadastro realizado!",
-        description: "Verifique seu e-mail para confirmar o cadastro.",
-      });
-    }
-
-    return { error, user: data?.user ?? null };
-  };
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      toast({
-        title: "Erro ao entrar",
-        description: error.message || "Verifique seus dados e tente novamente.",
-      });
-    } else {
-      toast({
-        title: "Login realizado!",
-        description: "Bem-vindo de volta!",
-      });
+    // Simulação de autenticação
+    if (email && password) {
+      const fakeUser: User = { id: "1", name: "Paulo", email, isAdmin: true };
+      setUser(fakeUser);
+      return {};
     }
-
-    if (!error && data?.user) {
-      // Verifica se é admin
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.user.id)
-        .single();
-
-      if (profile?.role === "admin") {
-        window.location.href = "/admin";
-      } else {
-        window.location.href = "/dashboard";
-      }
-    }
-
-    return { error };
+    return { error: { message: "E-mail ou senha inválidos." } };
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Logout realizado",
-      description: "Você saiu da sua conta.",
-    });
+  const signUp = async (email: string, password: string, name: string) => {
+    // Simulação de cadastro
+    if (email && password && name) {
+      // Aqui você poderia criar o usuário
+      return {};
+    }
+    return { error: { message: "Preencha todos os campos." } };
+  };
+
+  const logout = () => {
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      signUp,
-      signIn,
-      signOut,
-      loading
-    }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export default function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;}
