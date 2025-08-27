@@ -21,7 +21,6 @@ interface Referral {
   status: string;
   estimate_value: number | null;
   commission_percent: number | null;
-  commission_amount: number | null;
   user_id: string;
   user: Profile | null;
 }
@@ -42,6 +41,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchReferrals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchReferrals() {
@@ -53,7 +53,6 @@ export default function AdminDashboard() {
         status,
         estimate_value,
         commission_percent,
-        commission_amount,
         user_id,
         user:profiles(id, name, email, phone, role, pix_key, created_at)
       `);
@@ -196,6 +195,5 @@ export default function AdminDashboard() {
           </tbody>
         </table>
       </div>
-      {/* Aqui pode entrar o botão de exportar para Google Sheets futuramente */}
-    </div>
-  );
+      </div>)}
+      {/* Aqui você pode adicionar paginação se necessário */}
