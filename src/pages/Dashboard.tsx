@@ -143,7 +143,7 @@ export default function Dashboard() {
   if (!user) {
     return null;
   }
-
+   const [showAllReferrals, setShowAllReferrals] = useState(false);
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -237,6 +237,10 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* ...Header e KPI Cards... */}
+
         {/* Recent Referrals and Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 shadow-elegant border-0">
@@ -248,6 +252,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               {loading ? (
+                // ...loading...
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -255,6 +260,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : referrals.length === 0 ? (
+                // ...nenhuma indicação...
                 <div className="text-center py-8">
                   <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">Nenhuma indicação ainda</h3>
@@ -268,7 +274,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {referrals.map((referral) => (
+                  {(showAllReferrals ? referrals : referrals.slice(0, 3)).map((referral) => (
                     <div
                       key={referral.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -311,6 +317,22 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
+                  {/* Botão "Ver mais..." */}
+                  {!showAllReferrals && referrals.length > 3 && (
+                    <div className="flex justify-center">
+                      <Button variant="outline" onClick={() => setShowAllReferrals(true)}>
+                        Ver mais...
+                      </Button>
+                    </div>
+                  )}
+                  {/* Botão "Ver menos..." */}
+                  {showAllReferrals && referrals.length > 3 && (
+                    <div className="flex justify-center">
+                      <Button variant="ghost" onClick={() => setShowAllReferrals(false)}>
+                        Ver menos
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -336,10 +358,17 @@ export default function Dashboard() {
                 <Home className="h-4 w-4 mr-2" />
                 FAQ
               </Button>
+              {/* Novo botão para cadastrar PIX */}
+              <Button onClick={() => navigate('/cadastrar-pix')} variant="outline" className="w-full justify-start">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Cadastrar PIX
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  </div>
+</div>     
   );
 }

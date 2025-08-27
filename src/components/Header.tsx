@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Building2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { useIsAdmin, useIsStaff, useUserRole } from "@/hooks/useIsAdmin";
 interface NavigationItem {
   name: string;
   href: string;
+  section: "public" | "user" | "admin" | "finance" | "commercial";
   protected?: boolean;
   adminOnly?: boolean;
   financeOnly?: boolean;
@@ -16,59 +17,65 @@ interface NavigationItem {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const isAdmin = useIsAdmin();
   const isStaff = useIsStaff();
   const userRole = useUserRole();
   const navigate = useNavigate();
 
-  // Dynamic navigation based on user role
-  const getNavigationItems = (): NavigationItem[] => {
-    const baseNavigation: NavigationItem[] = [
-      { name: "Início", href: "/" },
-      { name: "Dashboard", href: "/dashboard", protected: true },
-      { name: "FAQ", href: "/faq" },
-    ];
-
-    if (user) {
-      // Items for all authenticated users
-      baseNavigation.push(
-        { name: "Indicar", href: "/indicar", protected: true },
-        { name: "Comissões", href: "/comissoes", protected: true }
-      );
-
-      // Role-specific items
-      if (isAdmin) {
-        baseNavigation.push(
-          { name: "Admin", href: "/admin", adminOnly: true },
-          { name: "Gestão de Imóveis", href: "/gestao-imoveis", adminOnly: true },
-          { name: "Usuários", href: "/usuarios", adminOnly: true }
-        );
-      }
-
-      if (userRole === 'finance' || isAdmin) {
-        baseNavigation.push(
-          { name: "Financeiro", href: "/financeiro", financeOnly: true }
-        );
-      }
-
-      if (userRole === 'commercial' || isAdmin) {
-        baseNavigation.push(
-          { name: "Comercial", href: "/comercial", commercialOnly: true }
-        );
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
       }
     }
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
-    // Public pages at the end
-    baseNavigation.push(
-      { name: "Como Funciona", href: "/como-funciona" },
-      { name: "Sobre o Aplicativo", href: "/sobre-aplicativo" }
-    );
+  // Organização das rotas por seção
+  const navigation: NavigationItem[] = [
+    { name: "Início", href: "/", section: "public" },
+    { name: "Como Funciona", href: "/como-funciona", section: "public" },
+    { name: "Sobre o Aplicativo", href: "/sobre-aplicativo", section: "public" },
+    { name: "FAQ", href: "/faq", section: "public" },
 
-    return baseNavigation;
-  };
+    { name: "Dashboard", href: "/dashboard", section: "user", protected: true },
+    { name: "Indicar", href: "/indicar", section: "user", protected: true },
+    { name: "Comissões", href: "/comissoes", section: "user", protected: true },
 
-  const navigation = getNavigationItems();
+    { name: "Admin", href: "/admin", section: "admin", adminOnly: true },
+    { name: "Gestão de Imóveis", href: "/gestao-imoveis", section: "admin", adminOnly: true },
+    { name: "Usuários", href: "/usuarios", section: "admin", adminOnly: true },
+
+    { name: "Financeiro", href: "/financeiro", section: "finance", financeOnly: true },
+    { name: "Comercial", href: "/comercial", section: "commercial", commercialOnly: true },
+  ];
+
+  // Filtra e organiza por seção
+  const sections = [
+    { title: "Área do Usuário", key: "user" },
+    { title: "Administração", key: "admin" },
+    { title: "Financeiro", key: "finance" },
+    { title: "Comercial", key: "commercial" },
+    { title: "Público", key: "public" },
+  ];
+
+  const filteredNavigation = (section: string) =>
+    navigation.filter((item) => {
+      if (item.section !== section) return false;
+      if (item.protected && !user) return false;
+      if (item.adminOnly && !isAdmin) return false;
+      if (item.financeOnly && userRole !== "finance" && !isAdmin) return false;
+      if (item.commercialOnly && userRole !== "commercial" && !isAdmin) return false;
+      return true;
+    });
 
   const handleSignOut = () => {
     logout();
@@ -97,66 +104,65 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Menu mobile estilizado */}
-      {isMenuOpen && (
-        <div className="bg-white shadow-lg rounded-b-xl py-6 px-4 flex flex-col items-center space-y-3 animate-fade-in-down border-t border-blue-100">
-          {navigation.map((item) => {
-            if (item.protected && !user) return null;
-            if (item.adminOnly && !isAdmin) return null;
-            if (item.financeOnly && userRole !== 'finance' && !isAdmin) return null;
-            if (item.commercialOnly && userRole !== 'commercial' && !isAdmin) return null;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="w-full text-blue-800 hover:bg-blue-50 hover:text-orange-500 text-base font-medium rounded transition-colors py-2 text-center"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
-
-          <div className="w-full flex flex-col items-center pt-2 border-t border-blue-100">
+       {/* Sidebar lateral */}
+      <div
+        className={`fixed inset-0 z-50 transition-all duration-300 ${isMenuOpen ? "visible" : "invisible pointer-events-none"}`}
+        style={{ background: isMenuOpen ? "rgba(0,0,0,0.25)" : "transparent" }}
+      >
+        <nav
+          ref={sidebarRef}
+          className={`fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"} flex flex-col`}
+        >
+          <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100">
+            <span className="font-bold text-blue-800 text-lg">Menu</span>
+            <button onClick={() => setIsMenuOpen(false)} aria-label="Fechar menu">
+              <X className="h-6 w-6 text-blue-800" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+            {sections.map((section) => {
+              const items = filteredNavigation(section.key);
+              if (!items.length) return null;
+              return (
+                <div key={section.key}>
+                  <div className="text-xs font-semibold text-blue-400 uppercase mb-2">{section.title}</div>
+                  <div className="flex flex-col space-y-1">
+                    {items.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className="text-blue-800 hover:bg-blue-50 hover:text-orange-500 text-base font-medium rounded transition-colors py-2 px-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="px-6 py-4 border-t border-blue-100">
             {user ? (
               <Button
                 variant="outline"
                 onClick={handleSignOut}
-                className="w-full flex items-center justify-center mt-2"
+                className="w-full flex items-center justify-center"
               >
                 <LogOut className="h-4 w-4 mr-1" /> Sair
               </Button>
             ) : (
               <Link
                 to="/auth"
-                className="w-full text-blue-800 hover:bg-blue-50 hover:text-orange-500 text-base font-medium rounded transition-colors py-2 text-center mt-2"
+                className="w-full text-blue-800 hover:bg-blue-50 hover:text-orange-500 text-base font-medium rounded transition-colors py-2 text-center block"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Login
               </Link>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Animação fade-in-down */}
-      <style>
-        {`
-          .animate-fade-in-down {
-            animation: fadeInDown 0.25s ease;
-          }
-          @keyframes fadeInDown {
-            from {
-              opacity: 0;
-              transform: translateY(-16px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
+        </nav>
+      </div>
     </header>
   );
 };

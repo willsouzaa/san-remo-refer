@@ -14,7 +14,8 @@ import ComoFunciona from './pages/ComoFunciona';
 import SobreAplicativo from './pages/SobreAplicativo';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from '@/components/ui/toaster';
-// Adicione a importação da nova página de gestão de usuários
+import CadastrarPix from '@/pages/CadastrarPix';
+
 import AdminUsers from './pages/AdminUsers';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         {/* Conteúdo das rotas */}
         <Routes>
           {/* Públicas */}
+          <Route path="/cadastrar-pix" element={<CadastrarPix />} />
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/faq" element={<FAQ />} />
