@@ -52,7 +52,7 @@ const Header = () => {
 
     { name: "Admin", href: "/admin", section: "admin", adminOnly: true },
     { name: "Gestão de Imóveis", href: "/gestao-imoveis", section: "admin", adminOnly: true },
-    { name: "Usuários", href: "/usuarios", section: "admin", adminOnly: true },
+    { name: "Usuários", href: "/admin/usuarios", section: "admin", adminOnly: true },
 
     { name: "Financeiro", href: "/financeiro", section: "finance", financeOnly: true },
     { name: "Comercial", href: "/comercial", section: "commercial", commercialOnly: true },
@@ -94,14 +94,28 @@ const Header = () => {
           <span className="font-bold text-blue-800 text-lg tracking-wide">San Remo Imóveis</span>
         </Link>
 
-        {/* Botão Menu Hambúrguer estilizado */}
-        <button
-          className={`p-2 rounded-lg transition-colors duration-200 border-2 border-blue-100 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 text-blue-800 shadow ${isMenuOpen ? "bg-blue-100" : ""}`}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-        >
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Botão Cadastrar visível fora do menu */}
+          {user && (
+            <Button
+              onClick={() => navigate('/cadastrar-pix')}
+              variant="outline"
+              size="sm"
+              className="hidden md:flex border-orange-500 text-orange-500 hover:bg-orange-50"
+            >
+              Cadastrar PIX
+            </Button>
+          )}
+          
+          {/* Botão Menu Hambúrguer estilizado */}
+          <button
+            className={`p-2 rounded-lg transition-colors duration-200 border-2 border-blue-100 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 text-blue-800 shadow ${isMenuOpen ? "bg-blue-100" : ""}`}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
        {/* Sidebar lateral */}

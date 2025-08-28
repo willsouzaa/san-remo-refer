@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import useAuth from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut, Edit, Trash2 } from 'lucide-react';
+import { Plus, Home, TrendingUp, CheckCircle, DollarSign, Calendar, LogOut, Edit, Trash2, Share2, MessageCircle, Facebook, Instagram, Link } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { generateReferralLink, shareToWhatsApp, shareToFacebook, shareToInstagram } from '@/utils/shareUtils';
 
 interface Referral {
   id: string;
@@ -75,13 +76,12 @@ export default function Dashboard() {
 
     setLoading(true);
 
-    // Fetch referrals
+    // Fetch referrals (get all for proper pagination)
     const { data: referralsData, error: referralsError } = await supabase
       .from('referrals')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .order('created_at', { ascending: false });
 
     // Fetch all referrals for stats
     const { data: allReferrals, error: statsError } = await supabase
@@ -237,10 +237,6 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* ...Header e KPI Cards... */}
-
         {/* Recent Referrals and Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 shadow-elegant border-0">
@@ -363,12 +359,41 @@ export default function Dashboard() {
                 <DollarSign className="h-4 w-4 mr-2" />
                 Cadastrar PIX
               </Button>
+              
+              {/* Sharing Section */}
+              <div className="pt-4 border-t">
+                <h4 className="text-sm font-medium mb-3">Compartilhar Link de Referência</h4>
+                <div className="space-y-2">
+                  <Button onClick={() => shareToWhatsApp(user.id)} variant="outline" size="sm" className="w-full justify-start">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp
+                  </Button>
+                  <Button onClick={() => shareToFacebook(user.id)} variant="outline" size="sm" className="w-full justify-start">
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Facebook
+                  </Button>
+                  <Button onClick={() => shareToInstagram(user.id)} variant="outline" size="sm" className="w-full justify-start">
+                    <Instagram className="h-4 w-4 mr-2" />
+                    Instagram
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateReferralLink(user.id));
+                      alert('Link copiado para o clipboard!');
+                    }} 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                  >
+                    <Link className="h-4 w-4 mr-2" />
+                    Copiar Link
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  </div>
-</div>     
   );
 }

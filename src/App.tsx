@@ -15,6 +15,9 @@ import SobreAplicativo from './pages/SobreAplicativo';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from '@/components/ui/toaster';
 import CadastrarPix from '@/pages/CadastrarPix';
+import Financeiro from '@/pages/Financeiro';
+import Comercial from '@/pages/Comercial';
+import GestaoImoveis from '@/pages/GestaoImoveis';
 
 import AdminUsers from './pages/AdminUsers';
 
@@ -85,6 +88,36 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Finance Routes */}
+          <Route
+            path="/financeiro"
+            element={
+              <ProtectedRoute financeOnly>
+                <Financeiro />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Commercial Routes */}
+          <Route
+            path="/comercial"
+            element={
+              <ProtectedRoute commercialOnly>
+                <Comercial />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Property Management Routes */}
+          <Route
+            path="/gestao-imoveis"
+            element={
+              <ProtectedRoute adminOnly>
+                <GestaoImoveis />
               </ProtectedRoute>
             }
           />

@@ -6,46 +6,55 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, Filter, CheckCircle, Clock, DollarSign, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download, Filter, CheckCircle, Clock, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { downloadCSV } from '@/utils/shareUtils';
 
 interface Commission {
   id: string;
-  deal_value: number;
-  commission_rate: number;
   commission_amount: number;
   status: string;
   created_at: string;
+  deal_value: number;
+  commission_rate: number;
   referrals: {
-    id: string;
     address: string;
     property_type: string;
   };
+  profiles: {
+    name: string;
+    email: string;
+  };
 }
 
-export default function Commissions() {
+export default function Financeiro() {
+  const { user } = useAuth();
+  const userRole = useUserRole();
+  const navigate = useNavigate();
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const { user } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) {
       navigate('/auth');
       return;
     }
+
+    if (userRole !== 'finance' && userRole !== 'admin') {
+      navigate('/dashboard');
+      return;
+    }
+
     fetchCommissions();
-  }, [user]);
+  }, [user, userRole, navigate]);
 
   const fetchCommissions = async () => {
-    if (!user) return;
-
     setLoading(true);
     
     let query = supabase
@@ -53,12 +62,14 @@ export default function Commissions() {
       .select(`
         *,
         referrals:referral_id (
-          id,
           address,
           property_type
+        ),
+        profiles:user_id (
+          name,
+          email
         )
       `)
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (statusFilter !== 'all') {
@@ -80,12 +91,30 @@ export default function Commissions() {
     } else {
       setCommissions(data || []);
     }
+
     setLoading(false);
+  };
+
+  const markAsPaid = async (commissionId: string) => {
+    const { error } = await supabase
+      .from('commissions')
+      .update({ status: 'paid' })
+      .eq('id', commissionId);
+
+    if (error) {
+      alert('Erro ao marcar como pago: ' + error.message);
+    } else {
+      setCommissions(commissions.map(c => 
+        c.id === commissionId ? { ...c, status: 'paid' } : c
+      ));
+    }
   };
 
   const exportToCSV = () => {
     const csvData = commissions.map(commission => ({
       'Data': format(new Date(commission.created_at), 'dd/MM/yyyy', { locale: ptBR }),
+      'Usuario': commission.profiles?.name || 'N/A',
+      'Email': commission.profiles?.email || 'N/A',
       'Endereço': commission.referrals?.address || 'N/A',
       'Tipo': commission.referrals?.property_type || 'N/A',
       'Valor do Negócio': `R$ ${commission.deal_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -94,7 +123,7 @@ export default function Commissions() {
       'Status': commission.status === 'paid' ? 'Pago' : 'Pendente'
     }));
 
-    const filename = `minhas-comissoes-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    const filename = `comissoes-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     downloadCSV(csvData, filename);
   };
 
@@ -106,13 +135,13 @@ export default function Commissions() {
     .filter(c => c.status === 'paid')
     .reduce((sum, c) => sum + c.commission_amount, 0);
 
-  if (!user) {
+  if (!user || (userRole !== 'finance' && userRole !== 'admin')) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -122,10 +151,10 @@ export default function Commissions() {
             </Button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Minhas Comissões
+                Painel Financeiro
               </h1>
               <p className="text-muted-foreground">
-                Acompanhe o histórico dos seus ganhos com indicações
+                Gestão de comissões e pagamentos
               </p>
             </div>
           </div>
@@ -136,7 +165,7 @@ export default function Commissions() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="shadow-elegant border-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Pendente</CardTitle>
@@ -163,6 +192,21 @@ export default function Commissions() {
                   style: 'currency',
                   currency: 'BRL'
                 }).format(totalPaid)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-elegant border-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Geral</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(totalPending + totalPaid)}
               </div>
             </CardContent>
           </Card>
@@ -223,7 +267,7 @@ export default function Commissions() {
           <CardHeader>
             <CardTitle>Comissões</CardTitle>
             <CardDescription>
-              Lista de todas as suas comissões ({commissions.length} registros)
+              Lista de todas as comissões ({commissions.length} registros)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -234,14 +278,7 @@ export default function Commissions() {
               </div>
             ) : commissions.length === 0 ? (
               <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Nenhuma comissão encontrada</h3>
-                <p className="text-muted-foreground mb-4">
-                  Ajuste os filtros ou continue indicando imóveis!
-                </p>
-                <Button onClick={() => navigate('/indicar')}>
-                  Indicar imóvel
-                </Button>
+                <p className="text-muted-foreground">Nenhuma comissão encontrada.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -255,25 +292,34 @@ export default function Commissions() {
                         <Badge variant={commission.status === 'paid' ? 'default' : 'secondary'}>
                           {commission.status === 'paid' ? 'Pago' : 'Pendente'}
                         </Badge>
-                        <span className="text-sm text-muted-foreground capitalize">
-                          {commission.referrals?.property_type}
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date(commission.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                         </span>
                       </div>
-                      <p className="font-medium">{commission.referrals?.address}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(commission.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                      </p>
+                      <p className="font-medium">{commission.profiles?.name || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground">{commission.profiles?.email || 'N/A'}</p>
+                      <p className="text-sm">{commission.referrals?.address || 'N/A'}</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
-                        }).format(commission.commission_amount)}
+                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Comissão</p>
+                        <p className="font-semibold">
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          }).format(commission.commission_amount)}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Taxa de {(commission.commission_rate * 100).toFixed(1)}% sobre R$ {commission.deal_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
+                      {commission.status === 'pending' && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => markAsPaid(commission.id)}
+                          className="mt-2"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Marcar como Pago
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}

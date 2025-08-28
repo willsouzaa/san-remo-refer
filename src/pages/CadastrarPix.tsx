@@ -33,11 +33,9 @@ export default function CadastrarPix() {
       return;
     }
 
-    // Salva no Supabase com o user_id correto
-    
-    const { error } =await (supabase as any)
-        .from("pix_keys")
-        .insert([{ ...form, user_id: user.id }]);
+    const { error } = await supabase
+      .from("pix_keys")
+      .insert([{ ...form, user_id: user.id }]);
 
     if (error) {
       setErro("Erro ao cadastrar PIX: " + error.message);
@@ -93,7 +91,7 @@ export default function CadastrarPix() {
               <Label htmlFor="chavePix">Chave PIX</Label>
               <Input
                 id="chavePix"
-                name="chavePix"
+                name="chavepix"
                 value={form.chavepix}
                 onChange={handleChange}
                 required

@@ -62,6 +62,44 @@ export type Database = {
           },
         ]
       }
+      pix_keys: {
+        Row: {
+          banco: string
+          chavepix: string
+          created_at: string | null
+          id: string
+          nome: string
+          tipopix: string
+          user_id: string
+        }
+        Insert: {
+          banco: string
+          chavepix: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          tipopix: string
+          user_id: string
+        }
+        Update: {
+          banco?: string
+          chavepix?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          tipopix?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pix_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
